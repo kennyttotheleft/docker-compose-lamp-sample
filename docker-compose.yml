@@ -1,0 +1,57 @@
+version: "2"
+services:
+  app:
+    build:
+      context: .
+      dockerfile: ./php/Dockerfile
+      args:
+        PROJECT_NAME: $PROJECT_NAME
+    container_name: "app"
+    environment:
+      - PROJECT_NAME=app-api
+    ports:
+      - "4000:80"
+      - "4001:8080"
+    volumes:
+      - ./volumes/$PROJECT_NAME:/var/www/html
+    tty: true
+    links:
+      - db
+      - redis
+  db:
+    restart: always
+    image: mysql:5.7
+    container_name: "db"
+    environment:
+      - MYSQL_DATABASE=test
+      - MYSQL_USER=test
+      - MYSQL_PASSWORD=test
+      - MYSQL_ROOT_PASSWORD=root
+    ports:
+      - 13306:3306
+    volumes:
+      - ./mysql/my.cnf:/etc/mysql/conf.d/my.conf
+      - ./volumes/db:/var/lib/mysql
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: "pma"
+    environment:
+      - PMA_ARBITRARY=1
+      - PMA_HOST=db
+      - PMA_USER=root
+      - PMA_PASSWORD=root
+    ports:
+      - 4040:80
+    volumes:
+      - ./volumes/pma/session:/sessions
+    links:
+      - db
+  redis:
+    restart: always
+    image: redis:alpine
+    container_name: redis
+    ports:
+      - 6379:6379
+    command: redis-server --appendonly yes --requirepass foobared
+    volumes:
+      - ./volumes/redis:/data
