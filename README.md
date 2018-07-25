@@ -22,7 +22,7 @@ $ mkdir -p volumes/web/public
 $ echo "<?php echo phpinfo();" >> volumes/web/public/index.php
 ```
 
-4. Access http://localhost:4040/ for PhpMyAdmin.
+4. Access http://localhost:4040/ for phpMyAdmin.
 
 ## Document Root customization
 
