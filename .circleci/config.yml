@@ -1,18 +1,29 @@
 version: 2
 jobs:
   build:
-    machine: true
+    docker:
+      - image: circleci/php:latest
+
+    working_directory: ~/repo
+
     steps:
       - checkout
       - run:
           name: Install Docker Compose
           command: |
             set -x
-            curl -L https://github.com/docker/compose/releases/download/1.11.2/docker-compose-`uname -s`-`uname -m` > /usr/local/bin/docker-compose
-            chmod +x /usr/local/bin/docker-compose
+            curl -L https://github.com/docker/compose/releases/download/1.8.0/docker-compose-`uname -s`-`uname -m` > ~/docker-compose
+            chmod +x ~/docker-compose
+            sudo mv ~/docker-compose /usr/local/bin/docker-compose
       - run:
-        name: docker-compose up
-        command: |
-          docker-compose up -d
-          docker run --network host \
-            appropriate/curl --retry 10 --retry-delay 1 --retry-connrefused http://localhost:4000
+          name: Check docker version
+          command: |
+            docker version
+            docker-compose version
+      - run:
+          name: Start container and verify it's working
+          command: |
+            set -x
+            docker-compose up -d
+            docker run --network host \
+              appropriate/curl --retry 10 --retry-delay 1 --retry-connrefused http://localhost:4000
